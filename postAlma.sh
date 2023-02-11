@@ -27,7 +27,7 @@ echo "tmpfs /tmp tmpfs defaults,nosuid,nodev,noexec,size=1g 0 0" | sudo tee -a /
 sudo rm -fr /tmp/* && sudo mount /tmp
 
 # Create a new partition for docker
-sudo lvcreate --wipesignatures y -n docker vg -l 100%VG
+sudo lvcreate -y --wipesignatures y -n docker vg -l 100%VG
 sudo mkfs.xfs /dev/vg/docker
 cat << EOF | sudo tee -a /etc/fstab
 /dev/vg/docker /var/lib/docker xfs rw,seclabel,relatime,attr2,inode64,logbufs=8,logbsize=32k,noquota,nodev,nosuid 0 0
@@ -42,7 +42,7 @@ sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/dock
 sudo dnf install -y docker-ce docker-ce-cli containerd.io
 
 # Add the current user to the docker group
-sudo usermod -aG docker $USER
+sudo usermod -a -G docker almalinux
 
 # Start Docker
 sudo systemctl enable docker
@@ -51,6 +51,27 @@ sudo systemctl start docker
 # Install Docker Compose
 pip install --upgrade docker-compose
 
+# Install Firewalld
+sudo dnf install -y firewalld
+
+sudo systemctl enable firewalld
+sudo systemctl start firewalld
+
+sudo firewall-cmd --permanent --zone=public --set-target=DROP
+sudo firewall-cmd --permanent --zone=public --remove-service=cockpit
+sudo firewall-cmd --reload
+
 # Allow docker network to access the internet
 sudo firewall-cmd --zone=docker --add-masquerade --permanent
 sudo firewall-cmd --reload
+
+# Install CrowdSec
+curl -s https://packagecloud.io/install/repositories/crowdsec/crowdsec/script.rpm.sh | sudo bash
+sudo dnf install -y crowdsec
+sudo systemctl enable --now crowdsec
+sudo cscli console enroll <enroll_token>
+sudo dnf install -y crowdsec-firewall-bouncer-nftables
+sudo systemctl enable --now crowdsec-firewall-bouncer
+
+sudo sed -i 's/  type: sqlite/  type: sqlite\n  use_wal: false/g' /etc/crowdsec/config.yaml
+sudo systemctl restart crowdsec
