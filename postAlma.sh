@@ -41,15 +41,17 @@ sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/dock
 # Install Docker
 sudo dnf install -y docker-ce docker-ce-cli containerd.io
 
-# Add the current user to the docker group
-sudo usermod -a -G docker almalinux
-
 # Start Docker
 sudo systemctl enable docker
 sudo systemctl start docker
 
 # Install Docker Compose
-pip install --upgrade docker-compose
+sudo dnf install -y python3-pip
+sudo -H pip install --upgrade docker-compose
+
+cat << EOF | sudo tee -a /etc/sudoers.d/custom_path
+Defaults secure_path="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin"
+EOF
 
 # Install Firewalld
 sudo dnf install -y firewalld
@@ -69,9 +71,10 @@ sudo firewall-cmd --reload
 curl -s https://packagecloud.io/install/repositories/crowdsec/crowdsec/script.rpm.sh | sudo bash
 sudo dnf install -y crowdsec
 sudo systemctl enable --now crowdsec
-sudo cscli console enroll <enroll_token>
 sudo dnf install -y crowdsec-firewall-bouncer-nftables
 sudo systemctl enable --now crowdsec-firewall-bouncer
 
 sudo sed -i 's/  type: sqlite/  type: sqlite\n  use_wal: false/g' /etc/crowdsec/config.yaml
 sudo systemctl restart crowdsec
+
+return 0
