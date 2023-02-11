@@ -77,6 +77,5 @@ sudo systemctl enable --now crowdsec-firewall-bouncer
 sudo sed -i 's/  type: sqlite/  type: sqlite\n  use_wal: false/g' /etc/crowdsec/config.yaml
 sudo systemctl restart crowdsec
 
-
 # Write a message to the console to inform the user that the installation is complete
 echo "Installation complete."
