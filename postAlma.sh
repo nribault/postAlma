@@ -41,10 +41,6 @@ sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/dock
 # Install Docker
 sudo dnf install -y docker-ce docker-ce-cli containerd.io
 
-# Allow docker network to access the internet
-sudo systemctl enable nftables
-sudo systemctl start nftables
-
 # Start Docker
 sudo systemctl enable docker
 sudo systemctl start docker
@@ -66,6 +62,10 @@ sudo systemctl start firewalld
 sudo firewall-cmd --permanent --zone=public --set-target=DROP
 sudo firewall-cmd --permanent --zone=public --remove-service=cockpit
 sudo firewall-cmd --reload
+
+# Allow docker network to access the internet
+sudo systemctl enable nftables
+sudo systemctl start nftables
 
 # Install CrowdSec
 curl -s https://packagecloud.io/install/repositories/crowdsec/crowdsec/script.rpm.sh | sudo bash
