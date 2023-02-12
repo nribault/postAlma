@@ -87,5 +87,27 @@ cat << EOF | sudo tee -a /etc/sudoers.d/custom_path
 Defaults secure_path="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin"
 EOF
 
+# Install Watchtower to update the containers
+
+mkdir -p ~/docker/watchtower
+cd ~/docker/watchtower
+
+cat << EOF | tee docker-compose.yml
+---
+version: "3"
+services:
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+        - TZ=Europe/Paris
+    command: --interval 14400 --cleanup --include-restarting --include-stopped
+EOF
+
+sudo docker-compose up -d
+
 # Write a message to the console to inform the user that the installation is complete
 echo "Installation complete."
