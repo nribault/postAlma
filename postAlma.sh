@@ -63,9 +63,7 @@ sudo firewall-cmd --permanent --zone=public --set-target=DROP
 sudo firewall-cmd --permanent --zone=public --remove-service=cockpit
 sudo firewall-cmd --reload
 
-# Allow docker network to access the internet
-sudo systemctl enable nftables
-sudo systemctl start nftables
+sudo systemctl restart docker.service
 
 # Install CrowdSec
 curl -s https://packagecloud.io/install/repositories/crowdsec/crowdsec/script.rpm.sh | sudo bash
