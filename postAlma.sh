@@ -73,7 +73,7 @@ cat << EOF | sudo tee /etc/docker/daemon.json
     "overlay2.override_kernel_check=true"
   ],
   "exec-opts": ["native.cgroupdriver=systemd"],
-  "dns": [ "1.1.1.1" , "9.9.9.9" ] }
+}
 EOF
 
 sudo systemctl enable docker
@@ -105,6 +105,8 @@ services:
     environment:
         - TZ=Europe/Paris
     command: --interval 14400 --cleanup --include-restarting --include-stopped
+    restart: unless-stopped
+
 EOF
 
 sudo docker-compose up -d
