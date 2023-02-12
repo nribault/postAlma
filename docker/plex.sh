@@ -19,6 +19,8 @@ services:
     volumes:
       - ./config:/config
       - torrents:/torrents
+    ports:
+      - 32400:32400
     restart: unless-stopped
 
 volumes:
@@ -32,6 +34,3 @@ networks:
 EOF
 
 sudo docker-compose up -d && sudo docker-compose logs -f
-
-sudo firewall-cmd --zone=public --add-port=32400/tcp --permanent
-sudo firewall-cmd --zone=public --add-port=32400/tcp
