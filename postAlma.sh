@@ -59,6 +59,23 @@ sudo mount -a
 sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 sudo dnf install -y docker-ce docker-ce-cli containerd.io
 
+mkdir -p /etc/docker
+
+cat << EOF | sudo tee /etc/docker/daemon.json
+{
+  "data-root": "/var/lib/docker",
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2",
+  "storage-opts": [
+    "overlay2.override_kernel_check=true"
+  ],
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "dns": [ "1.1.1.1" , "9.9.9.9" ] }
+EOF
+
 sudo systemctl enable docker
 sudo systemctl start docker
 
