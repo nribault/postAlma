@@ -17,8 +17,8 @@ services:
     container_name: transmission
     environment:
       - TZ=Europe/Paris
-      - USER=transmission
-      - PASS=changeme
+      - USER=<user>
+      - PASS=<pass>
       - PEERPORT=51413
     volumes:
       - ./config:/config
