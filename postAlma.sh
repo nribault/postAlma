@@ -42,6 +42,8 @@ sudo dnf install -y crowdsec
 sudo systemctl enable --now crowdsec
 sudo dnf install -y crowdsec-firewall-bouncer-nftables
 sudo systemctl enable --now crowdsec-firewall-bouncer
+sudo BOUNCER_CONFIG_PATH=/etc/crowdsec/bouncers/crowdsec-blocklist-mirror.yaml dnf install -y crowdsec-blocklist-mirror
+sudo systemctl enable --now crowdsec-blocklist-mirror
 
 sudo sed -i 's/  type: sqlite/  type: sqlite\n  use_wal: false/g' /etc/crowdsec/config.yaml
 sudo systemctl restart crowdsec
