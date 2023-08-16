@@ -53,9 +53,78 @@ systemctl enable docker.service
 systemctl start docker.service
 usermod -aG docker admin
 
-# Install Portainer
+# Install Portainer et Nginx Proxy Manager
 docker volume create portainer_data
-docker run -d -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ee:latest
+docker volume create npm_data
+docker volume create npm_letsencrypt
+docker volume create npm_db
+
+docker network create npm
+
+mkdir -p /root/portainer && cd /root/portainer
+
+cat <<EOF > /root/portainer/docker-compose.yml
+version: '3.8'
+services:
+  app:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: npm
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '81:81'
+    environment:
+      X_FRAME_OPTIONS: "sameorigin"
+      DB_MYSQL_HOST: "db"
+      DB_MYSQL_PORT: 3306
+      DB_MYSQL_USER: "\${MYSQL_USER}"
+      DB_MYSQL_PASSWORD: "\${MYSQL_PASSWORD}"
+      DB_MYSQL_NAME: "\${MYSQL_DATABASE}"
+    volumes:
+      - npm_data:/data
+      - npm_letsencrypt:/etc/letsencrypt
+    depends_on:
+      - db
+  db:
+    image: 'jc21/mariadb-aria:latest'
+    container_name: npm-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "\${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "\${MYSQL_DATABASE}"
+      MYSQL_USER: "\${MYSQL_USER}"
+      MYSQL_PASSWORD: "\${MYSQL_PASSWORD}"
+    volumes:
+      - npm_db:/var/lib/mysql
+  portainer:
+    image: portainer/portainer-ee:latest
+    container_name: portainer
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+volumes:
+  npm_data:
+  npm_letsencrypt:
+  npm_db:
+  portainer_data:
+
+networks:
+  default:
+    external: true
+    name: npm
+EOF
+
+cat <<EOF > /root/portainer/.env
+MYSQL_ROOT_PASSWORD=`openssl rand -base64 32 | sha256sum  | head -c 18 ; echo`
+MYSQL_DATABASE=`openssl rand -base64 32 | sha256sum  | head -c 18 ; echo`
+MYSQL_USER=`openssl rand -base64 32 | sha256sum  | head -c 18 ; echo`
+MYSQL_PASSWORD=`openssl rand -base64 32 | sha256sum  | head -c 18 ; echo`
+EOF
+
+docker compose up -d
 
 # Anonymise login messages
 rm -f /etc/motd && touch /etc/motd
