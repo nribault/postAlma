@@ -7,6 +7,7 @@ dnf install -y nano neovim vim bash-completion htop iotop iftop net-tools bind-u
 dnf install -y langpacks-en glibc-all-langpacks
 dnf autoremove -y
 
+
 ### Ajouter une partition tmpfs
 echo "tmpfs /tmp tmpfs defaults,nosuid,nodev,noexec,size=1g 0 0" | tee -a /etc/fstab
 echo "tmpfs /var/tmp tmpfs defaults,nosuid,nodev,noexec,size=1g 0 0" | tee -a /etc/fstab
@@ -28,6 +29,7 @@ sed -i 's/SELINUXTYPE=targeted/#SELINUXTYPE=targeted/g' /etc/selinux/config
 setenforce 1
 
 ## Installer et activer Firewalld
+
 dnf install -y firewalld
 systemctl enable firewalld
 systemctl start firewalld
@@ -54,6 +56,13 @@ usermod -aG docker admin
 # Install Portainer
 docker volume create portainer_data
 docker run -d -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ee:latest
+
+# Anonymise login messages
+rm -f /etc/motd && touch /etc/motd
+rm -f /etc/issue && touch /etc/issue
+rm -f /etc/issue.net && touch /etc/issue.net
+touch /root/.hushlogin
+touch /home/admin/.hushlogin
 
 # Reboot
 systemctl reboot
