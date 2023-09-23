@@ -67,8 +67,7 @@ cat <<EOF > /root/portainer/docker-compose.yml
 version: '3.8'
 services:
   npm:
-    #image: 'jc21/nginx-proxy-manager:latest'
-    image: 'baudneo/nginx-proxy-manager:latest'
+    image: 'jc21/nginx-proxy-manager:latest'
     container_name: npm
     restart: unless-stopped
     ports:
@@ -83,10 +82,6 @@ services:
       DB_MYSQL_USER: "\${MYSQL_USER}"
       DB_MYSQL_PASSWORD: "\${MYSQL_PASSWORD}"
       DB_MYSQL_NAME: "\${MYSQL_DATABASE}"
-
-      ADMIN_PANEL_LOG: "1"
-      CROWDSEC_BOUNCER: "1"
-      OPENRESTY_DEBUG: "0"
     volumes:
       - npm_data:/data
       - npm_letsencrypt:/etc/letsencrypt
